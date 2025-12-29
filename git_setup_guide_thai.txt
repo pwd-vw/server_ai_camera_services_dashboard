@@ -99,3 +99,57 @@ git branch -a
 git log --oneline
 
 ================================================================================
+⚠️  แก้ไขปัญหา "Repository not found"
+================================================================================
+
+ปัญหา: Error "remote: Repository not found" หรือ "fatal: repository not found"
+
+สาเหตุที่เป็นไปได้:
+1. Repository ยังไม่ได้สร้างบน GitHub
+2. ไม่มีสิทธิ์เข้าถึง organization "pwd-vw"
+3. Repository เป็น private และใช้ token ผิด account
+
+วิธีแก้ไขที่ 1: สร้าง Repository ผ่าน GitHub CLI (แนะนำ - ง่ายที่สุด)
+-------------------------------------------------
+# สร้าง repository ใน organization pwd-vw (ถ้ามีสิทธิ์)
+gh repo create pwd-vw/computer-vision --public --source=. --remote=origin --push
+
+# หรือสร้างใน personal account ของคุณ (popwandee)
+gh repo create computer-vision --public --source=. --remote=origin --push
+
+# แล้วเปลี่ยน remote URL ถ้าต้องการ
+git remote set-url origin https://github.com/pwd-vw/computer-vision.git
+
+วิธีแก้ไขที่ 2: สร้าง Repository ผ่าน GitHub Website
+-------------------------------------------------
+1. ไปที่ https://github.com/new
+2. Repository name: computer-vision
+3. Owner: 
+   - ถ้ามีสิทธิ์: เลือก organization "pwd-vw"
+   - ถ้าไม่มีสิทธิ์: ใช้ personal account (popwandee) แล้วแจ้งผู้ดูแล org ให้โอน repo
+4. เลือก Public หรือ Private
+5. **อย่า** check "Initialize with README"
+6. คลิก "Create repository"
+7. จากนั้น push:
+   git push -u origin main
+
+วิธีแก้ไขที่ 3: ตรวจสอบสิทธิ์เข้าถึง Organization
+-------------------------------------------------
+# ตรวจสอบ organizations ที่คุณเป็นสมาชิก
+gh api user/orgs --jq '.[].login'
+
+# ถ้าไม่มี organization pwd-vw แสดงว่ายังไม่มีสิทธิ์
+# ต้องขอสิทธิ์จากผู้ดูแล organization หรือสร้าง repo ใน personal account
+
+วิธีแก้ไขที่ 4: ใช้ Personal Access Token โดยตรง
+-------------------------------------------------
+# ถ้า repository มีอยู่แล้วแต่ไม่มีสิทธิ์ อาจต้องใช้ token ของ account ที่มีสิทธิ์
+# เปลี่ยน remote URL ให้รวม token:
+git remote set-url origin https://[YOUR_TOKEN]@github.com/pwd-vw/computer-vision.git
+
+# หรือใช้ Personal Access Token ใน credential helper:
+git push -u origin main
+# เมื่อถาม Username: ใส่ username
+# เมื่อถาม Password: ใส่ Personal Access Token (ไม่ใช่รหัสผ่าน!)
+
+================================================================================
