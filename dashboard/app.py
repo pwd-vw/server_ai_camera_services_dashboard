@@ -12,40 +12,69 @@ import os
 import re
 from pathlib import Path
 
-# ตรวจสอบว่าเข้าผ่าน nginx reverse proxy หรือไม่
-import os
-APPLICATION_ROOT = os.environ.get('APPLICATION_ROOT', '')
+# Base directory ของ dashboard (สำหรับโหลด config)
+DASHBOARD_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = DASHBOARD_DIR / 'config.json'
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app)
 
-# Services ที่ต้องการควบคุม
-SERVICES = {
-    'websocket': {
-        'name': 'websocket.service',
-        'display_name': 'WebSocket Service',
-        'description': 'AI Camera Websocket Service',
-        'config_path': '/etc/systemd/system/websocket.service',
-        'working_dir': '/home/devuser/aicamera/server/ws-service',
-        'port': 3001
-    },
-    'mqtt': {
-        'name': 'mqtt.service',
-        'display_name': 'MQTT Microservice',
-        'description': 'AI Camera MQTT Microservice',
-        'config_path': '/etc/systemd/system/mqtt.service',
-        'working_dir': '/home/devuser/aicamera/server/mqtt-service',
-        'port': None
-    },
-    'aicamera-mqtt': {
-        'name': 'aicamera-mqtt.service',
-        'display_name': 'AI Camera MQTT Broker',
-        'description': 'AI Camera MQTT Broker (Mosquitto)',
-        'config_path': '/etc/systemd/system/aicamera-mqtt.service',
-        'mosquitto_config': '/etc/mosquitto/conf.d/aicamera.conf',
-        'port': 1883
+
+def load_services_config():
+    """โหลด Services config จากไฟล์หรือ environment variables"""
+    default_services = {
+        'websocket': {
+            'name': 'websocket.service',
+            'display_name': 'WebSocket Service',
+            'description': 'AI Camera Websocket Service',
+            'config_path': '/etc/systemd/system/websocket.service',
+            'working_dir': '/home/devuser/aicamera/server/ws-service',
+            'port': 3001
+        },
+        'mqtt': {
+            'name': 'mqtt.service',
+            'display_name': 'MQTT Microservice',
+            'description': 'AI Camera MQTT Microservice',
+            'config_path': '/etc/systemd/system/mqtt.service',
+            'working_dir': '/home/devuser/aicamera/server/mqtt-service',
+            'port': None
+        },
+        'aicamera-mqtt': {
+            'name': 'aicamera-mqtt.service',
+            'display_name': 'AI Camera MQTT Broker',
+            'description': 'AI Camera MQTT Broker (Mosquitto)',
+            'config_path': '/etc/systemd/system/aicamera-mqtt.service',
+            'mosquitto_config': '/etc/mosquitto/conf.d/aicamera.conf',
+            'working_dir': None,
+            'port': 1883
+        }
     }
-}
+    if CONFIG_PATH.exists():
+        try:
+            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if 'services' in config:
+                    return config['services']
+        except (json.JSONDecodeError, IOError) as e:
+            print(f"Warning: Could not load config from {CONFIG_PATH}: {e}")
+    return default_services
+
+
+def get_storage_default():
+    """ดึง default storage path"""
+    if CONFIG_PATH.exists():
+        try:
+            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if 'storage' in config and 'default_path' in config['storage']:
+                    return config['storage']['default_path']
+        except (json.JSONDecodeError, IOError):
+            pass
+    return '/home/devuser/aicamera/server/storage'
+
+
+# โหลด Services config
+SERVICES = load_services_config()
 
 
 def run_systemctl_command(command, service_name):
@@ -437,8 +466,8 @@ def get_storage_path(service_id):
                     pass
     
     # Default storage path
-    default_storage = '/home/devuser/aicamera/server/storage'
-    if os.path.exists(default_storage):
+    default_storage = get_storage_default()
+    if default_storage and os.path.exists(default_storage):
         storage_paths['default'] = default_storage
     
     return jsonify({
@@ -544,11 +573,17 @@ def health_check():
     })
 
 
+@app.route('/dashboard/static/<path:filename>')
+def serve_dashboard_static(filename):
+    """Serve static files เมื่อเข้าผ่าน /dashboard/ path"""
+    return send_from_directory(app.static_folder, filename)
+
+
 @app.route('/')
 @app.route('/dashboard/')
 def index():
-    """Serve dashboard index page"""
-    return send_from_directory('static', 'index.html')
+    """Serve dashboard index page - ใช้ relative paths (static/style.css) ให้ทำงานทั้ง direct และ nginx /dashboard/"""
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 if __name__ == '__main__':

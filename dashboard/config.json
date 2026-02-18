@@ -1,0 +1,32 @@
+{
+  "services": {
+    "websocket": {
+      "name": "websocket.service",
+      "display_name": "WebSocket Service",
+      "description": "AI Camera Websocket Service",
+      "config_path": "/etc/systemd/system/websocket.service",
+      "working_dir": "/home/devuser/aicamera/server/ws-service",
+      "port": 3001
+    },
+    "mqtt": {
+      "name": "mqtt.service",
+      "display_name": "MQTT Microservice",
+      "description": "AI Camera MQTT Microservice",
+      "config_path": "/etc/systemd/system/mqtt.service",
+      "working_dir": "/home/devuser/aicamera/server/mqtt-service",
+      "port": null
+    },
+    "aicamera-mqtt": {
+      "name": "aicamera-mqtt.service",
+      "display_name": "AI Camera MQTT Broker",
+      "description": "AI Camera MQTT Broker (Mosquitto)",
+      "config_path": "/etc/systemd/system/aicamera-mqtt.service",
+      "mosquitto_config": "/etc/mosquitto/conf.d/aicamera.conf",
+      "working_dir": null,
+      "port": 1883
+    }
+  },
+  "storage": {
+    "default_path": "/home/devuser/aicamera/server/storage"
+  }
+}

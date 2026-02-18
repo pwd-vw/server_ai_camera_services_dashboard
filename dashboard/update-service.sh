@@ -8,7 +8,7 @@ echo ""
 
 # 1. อัปเดต service file
 echo "[1/3] กำลังอัปเดต service file..."
-sudo sed -i 's|ExecStart=/usr/bin/python3 app.py|ExecStart=/home/devuser/computer_vision/dashboard/.venv/bin/python3 app.py|' /etc/systemd/system/dashboard.service
+sudo sed -i 's|ExecStart=/usr/bin/python3 app.py|ExecStart=/home/devuser/edge_ai_dashboard/dashboard/.venv/bin/python3 app.py|' /etc/systemd/system/dashboard.service
 
 if [ $? -ne 0 ]; then
     echo "❌ ไม่สามารถอัปเดต service file ได้"

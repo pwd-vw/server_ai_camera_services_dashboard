@@ -12,9 +12,14 @@ if [ "$EUID" -eq 0 ]; then
    exit 1
 fi
 
-# 1. ติดตั้ง Python dependencies
+# 1. ติดตั้ง Python dependencies (ใช้ venv)
 echo "[1/4] กำลังติดตั้ง Python dependencies..."
-pip3 install -r requirements.txt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+fi
+.venv/bin/pip install -r requirements.txt
 
 if [ $? -ne 0 ]; then
     echo "❌ การติดตั้ง dependencies ล้มเหลว"
@@ -37,9 +42,16 @@ echo "devuser ALL=(ALL) NOPASSWD: /usr/bin/systemctl start *, /usr/bin/systemctl
 echo ""
 read -p "กด Enter เมื่อตั้งค่า sudoers เสร็จแล้ว..."
 
-# 3. สร้าง systemd service
+# 3. สร้าง systemd service (อัปเดต ExecStart ให้ใช้ venv ถ้ามี)
 echo "[3/4] กำลังสร้าง systemd service..."
-sudo cp dashboard.service /etc/systemd/system/dashboard.service
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+sudo cp dashboard.service /tmp/dashboard.service.tmp
+# ใช้ python จาก venv ถ้ามี
+if [ -f "$SCRIPT_DIR/.venv/bin/python3" ]; then
+    VENV_PYTHON="$SCRIPT_DIR/.venv/bin/python3"
+    sudo sed -i "s#ExecStart=/usr/bin/python3 app.py#ExecStart=$VENV_PYTHON app.py#" /tmp/dashboard.service.tmp
+fi
+sudo cp /tmp/dashboard.service.tmp /etc/systemd/system/dashboard.service
 sudo systemctl daemon-reload
 
 if [ $? -ne 0 ]; then

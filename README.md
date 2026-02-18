@@ -22,7 +22,7 @@ Dashboard สำหรับควบคุมและตรวจสอบส�
 ### 1. ติดตั้ง Dependencies
 
 ```bash
-cd /home/devuser/computer_vision/dashboard
+cd /home/devuser/edge_ai_dashboard/dashboard
 pip3 install -r requirements.txt
 ```
 
@@ -45,7 +45,7 @@ devuser ALL=(ALL) NOPASSWD: /usr/bin/systemctl start *, /usr/bin/systemctl stop 
 #### วิธีที่ 1: รันโดยตรง
 
 ```bash
-cd /home/devuser/computer_vision/dashboard
+cd /home/devuser/edge_ai_dashboard/dashboard
 python3 app.py
 ```
 
@@ -69,7 +69,7 @@ After=network.target
 [Service]
 Type=simple
 User=devuser
-WorkingDirectory=/home/devuser/computer_vision/dashboard
+WorkingDirectory=/home/devuser/edge_ai_dashboard/dashboard
 Environment=FLASK_APP=app.py
 ExecStart=/usr/bin/python3 app.py
 Restart=always
