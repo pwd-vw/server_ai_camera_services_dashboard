@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Camera Services Dashboard</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎥 AI Camera Services Dashboard</h1>
+            <p class="subtitle">ควบคุมและตรวจสอบสถานะ Services</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-indicator" id="connection-status">
+                <span class="status-dot"></span>
+                <span>กำลังเชื่อมต่อ...</span>
+            </div>
+            <button class="btn btn-secondary" onclick="refreshAll()">🔄 รีเฟรช</button>
+        </div>
+
+        <div class="services-grid" id="services-container">
+            <!-- Services จะถูกโหลดโดย JavaScript -->
+        </div>
+
+        <!-- Modal สำหรับแก้ไข Config -->
+        <div id="config-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>แก้ไข Configuration</h2>
+                    <span class="close" onclick="closeConfigModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Service:</label>
+                        <span id="config-service-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Config Path:</label>
+                        <span id="config-path"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="config-content">Configuration:</label>
+                        <textarea id="config-content" rows="20" placeholder="Configuration content..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="restart-after-update" checked>
+                            รีสตาร์ท service หลังอัปเดต
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeConfigModal()">ยกเลิก</button>
+                    <button class="btn btn-primary" onclick="saveConfig()">💾 บันทึก</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal สำหรับแก้ไข Storage Path -->
+        <div id="storage-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>แก้ไข Storage Path</h2>
+                    <span class="close" onclick="closeStorageModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Service:</label>
+                        <span id="storage-service-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="storage-path-input">Storage Path:</label>
+                        <input type="text" id="storage-path-input" placeholder="/path/to/storage">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="restart-after-storage-update" checked>
+                            รีสตาร์ท service หลังอัปเดต
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeStorageModal()">ยกเลิก</button>
+                    <button class="btn btn-primary" onclick="saveStoragePath()">💾 บันทึก</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal สำหรับดู Logs -->
+        <div id="logs-modal" class="modal">
+            <div class="modal-content modal-large">
+                <div class="modal-header">
+                    <h2>Service Logs</h2>
+                    <span class="close" onclick="closeLogsModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Service:</label>
+                        <span id="logs-service-name"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="logs-lines">จำนวนบรรทัด:</label>
+                        <select id="logs-lines">
+                            <option value="50">50</option>
+                            <option value="100" selected>100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="loadLogs()">🔄 โหลด Logs</button>
+                    </div>
+                    <pre id="logs-content" class="logs-content"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>
+
